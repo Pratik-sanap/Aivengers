@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TransGuard — Fraud Detection Dashboard</title>
+    <meta name="description" content="AI-Powered Real-Time Fraud Detection Analytics Dashboard">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap"
+        rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+    <!-- Particle Canvas Background -->
+    <canvas id="bg-canvas"></canvas>
+
+    <div class="page-wrapper">
+
+        <!-- ═══ HEADER ═══ -->
+        <header class="sentinel-header">
+            <div class="brand-logo">
+                <div class="logo-icon">🛡️</div>
+                <div>
+                    <div class="brand-name">TransGuard</div>
+                    <div class="brand-sub">Fraud Intelligence Platform</div>
+                </div>
+            </div>
+
+            <div class="header-center">
+                <div class="threat-ticker">
+                    <div class="ticker-pulse"></div>
+                    <span class="ticker-label">LIVE</span>
+                    <div style="overflow:hidden; flex:1;">
+                        <div class="ticker-scroll">
+                            🔴 ALERT: Card skimming cluster detected in Miami · 🟡 WARN: 3 high-value transactions
+                            flagged in LA · 🔴 ALERT: New botnet pattern identified · ✅ Model accuracy: 97.3% · Last
+                            model retrain: 2h ago
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="header-right">
+                <div class="status-badge">
+                    <div class="status-dot"></div> ONLINE
+                </div>
+                <div class="live-clock" id="live-clock">00:00:00</div>
+            </div>
+        </header>
+
+        <!-- ═══ MAIN CONTENT ═══ -->
+        <main class="main-container">
+            <div class="row g-4">
+
+                <!-- Left / Main Column -->
+                <div class="col-xl-9 col-lg-8 d-flex flex-column gap-4">
+
+                    <!-- KPI Row -->
+                    <div class="row g-3">
+                        <div class="col-sm-6 col-xl-3">
+                            <div class="kpi-card" style="--gradient: linear-gradient(90deg,#3b82f6,#06b6d4);">
+                                <div class="kpi-icon" style="background:rgba(59,130,246,0.15);">📊</div>
+                                <div class="kpi-label">Total Transactions</div>
+                                <div class="kpi-val text-light" id="kpi-total">0</div>
+                                <div class="kpi-trend" style="color:#3b82f6;">↑ 12.4% vs last week</div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-xl-3">
+                            <div class="kpi-card danger" style="--gradient: linear-gradient(90deg,#ef4444,#b91c1c);">
+                                <div class="kpi-icon" style="background:rgba(239,68,68,0.15);">🚨</div>
+                                <div class="kpi-label">Fraud Count</div>
+                                <div class="kpi-val" style="color:#ef4444;" id="kpi-fraud">0</div>
+                                <div class="kpi-trend" style="color:#ef4444;">↑ 3.1% this month</div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-xl-3">
+                            <div class="kpi-card" style="--gradient: linear-gradient(90deg,#8b5cf6,#6d28d9);">
+                                <div class="kpi-icon" style="background:rgba(139,92,246,0.15);">⚡</div>
+                                <div class="kpi-label">Risk Rate</div>
+                                <div class="kpi-val" style="color:#8b5cf6;" id="kpi-pct">0%</div>
+                                <div class="kpi-trend" style="color:#64748b;">↔ Stable</div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-xl-3">
+                            <div class="kpi-card success" style="--gradient: linear-gradient(90deg,#10b981,#059669);">
+                                <div class="kpi-icon" style="background:rgba(16,185,129,0.15);">💰</div>
+                                <div class="kpi-label">Losses Prevented</div>
+                                <div class="kpi-val" style="color:#10b981;" id="kpi-blocked">$0K</div>
+                                <div class="kpi-trend" style="color:#10b981;">↑ Saved this month</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Top Row -->
+                    <div class="row g-3">
+                        <div class="col-md-5">
+                            <div class="dash-card">
+                                <div class="card-title-bar">
+                                    <div class="card-title">🍩 Fraud vs Legit</div>
+                                    <span class="card-badge badge-live">LIVE</span>
+                                </div>
+                                <div class="chart-container"><canvas id="fraudVsLegitChart"></canvas></div>
+                            </div>
+                        </div>
+                        <div class="col-md-7">
+                            <div class="dash-card">
+                                <div class="card-title-bar">
+                                    <div class="card-title">📱 Device Change vs Fraud</div>
+                                </div>
+                                <div class="chart-container"><canvas id="deviceChangeChart"></canvas></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Full-width Hour Chart -->
+                    <div class="dash-card">
+                        <div class="card-title-bar">
+                            <div class="card-title">⏱️ Fraud Timeline — Last 24 Hours</div>
+                            <span class="card-badge badge-live">STREAMING</span>
+                        </div>
+                        <div class="chart-container" style="min-height:300px;"><canvas id="fraudByHourChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Charts -->
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="dash-card">
+                                <div class="card-title-bar">
+                                    <div class="card-title">📍 Fraud by Location</div>
+                                </div>
+                                <div class="chart-container"><canvas id="fraudLocationChart"></canvas></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="dash-card">
+                                <div class="card-title-bar">
+                                    <div class="card-title">💵 Transaction Amount Distribution</div>
+                                </div>
+                                <div class="chart-container"><canvas id="amountDistChart"></canvas></div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- ═══ SIDEBAR ═══ -->
+                <div class="col-xl-3 col-lg-4">
+                    <div class="sidebar-panel">
+                        <div class="sidebar-header">
+                            <div class="pulse-ring"></div>
+                            <div>
+                                <div class="inference-title">ML Inference</div>
+                                <div class="inference-sub">Real-time Analysis</div>
+                            </div>
+                        </div>
+
+                        <form id="fraudForm" novalidate>
+                            <div class="field-group">
+                                <div class="field-label">
+                                    <span>Transaction Amount</span>
+                                    <span
+                                        style="font-family:'JetBrains Mono',monospace;color:#3b82f6;font-size:0.7rem;">INR</span>
+                                </div>
+                                <input type="number" id="amount" class="form-control" placeholder="e.g. 250000.00"
+                                    step="0.01" required>
+                            </div>
+
+                            <div class="field-group">
+                                <div class="field-label">
+                                    <span>Hour of Transaction</span>
+                                    <span
+                                        style="font-family:'JetBrains Mono',monospace;color:#8b5cf6;font-size:0.7rem;">0–23</span>
+                                </div>
+                                <input type="number" id="hour" class="form-control" placeholder="e.g. 2 (Late Night)"
+                                    min="0" max="23" required>
+                            </div>
+
+                            <div class="field-group">
+                                <div class="field-label">Rapid txn (0/1)</div>
+                                <input id="rapid" class="form-control" placeholder="Rapid txn (0/1)">
+                            </div>
+
+                            <div class="field-group">
+                                <div class="field-label">Location change (0/1)</div>
+                                <input id="location" class="form-control" placeholder="Location change (0/1)">
+                            </div>
+
+                            <div class="field-group">
+                                <div class="field-label">Device Change</div>
+                                <select id="device" class="form-select" required>
+                                    <option value="" disabled selected>Select device status...</option>
+                                    <option value="0">0 — Same Device</option>
+                                    <option value="1">1 — New / Unknown Device</option>
+                                </select>
+                            </div>
+
+                            <div class="field-group">
+                                <div class="field-label">Dormant (0/1)</div>
+                                <input id="dormant" class="form-control" placeholder="Dormant (0/1)">
+                            </div>
+
+                            <!-- Live Risk Meter -->
+                            <div class="risk-meter">
+                                <div class="risk-meter-label">
+                                    <span>Risk Preview</span>
+                                    <span>Live Score</span>
+                                </div>
+                                <div class="risk-track">
+                                    <div class="risk-fill" id="risk-fill"></div>
+                                </div>
+                                <div class="risk-score-display">
+                                    <div class="risk-num" id="risk-num">0</div>
+                                    <div class="risk-denom">/ 100</div>
+                                </div>
+                                <div class="risk-verdict" id="risk-verdict">AWAITING INPUT</div>
+                            </div>
+
+                            <button type="button" onclick="checkFraud()" class="btn-analyze" id="analyzeBtn">
+                                🔍 &nbsp;ANALYZE TRANSACTION
+                            </button>
+
+                            <p id="result" style="margin-top:12px;"></p>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- ═══ INFERENCE MODAL ═══ -->
+    <div class="modal fade" id="inferenceModal" tabindex="-1" aria-labelledby="inferenceModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+
+                <!-- Scanning Stage -->
+                <div class="modal-stage active" id="stage-scanning">
+                    <div class="modal-body-inner">
+                        <div
+                            style="font-size:0.65rem;text-transform:uppercase;letter-spacing:2px;color:#64748b;margin-bottom:1.5rem;">
+                            Sentinel AI Engine v2.4
+                        </div>
+
+                        <div class="scan-progress-ring">
+                            <svg width="120" height="120" viewBox="0 0 120 120">
+                                <circle class="ring-bg" cx="60" cy="60" r="50" />
+                                <circle class="ring-fg" cx="60" cy="60" r="50" />
+                            </svg>
+                            <div class="ring-inner-text">
+                                <div class="ring-percent" id="ring-pct">0%</div>
+                                <div class="ring-label">Analyzed</div>
+                            </div>
+                        </div>
+
+                        <ul class="scan-steps-list">
+                            <li id="s0"><span class="step-icon">○</span> FEATURE EXTRACTION</li>
+                            <li id="s1"><span class="step-icon">○</span> GLOBAL BLACKLIST CHECK</li>
+                            <li id="s2"><span class="step-icon">○</span> BEHAVIORAL ANALYSIS</li>
+                            <li id="s3"><span class="step-icon">○</span> RANDOM FOREST MODEL</li>
+                            <li id="s4"><span class="step-icon">○</span> RISK SCORE CALCULATION</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Result Stage -->
+                <div class="modal-stage" id="stage-result">
+                    <div class="modal-body-inner">
+                        <div
+                            style="font-size:0.65rem;text-transform:uppercase;letter-spacing:2px;color:#64748b;margin-bottom:1.5rem;">
+                            Analysis Complete
+                        </div>
+
+                        <div class="result-ring" id="result-ring">
+                            <span id="result-icon">⚠️</span>
+                        </div>
+
+                        <div class="result-heading" id="result-heading">—</div>
+                        <div class="result-sub" id="result-sub">—</div>
+                        <div class="result-score-display" id="result-score">Score: — / 100</div>
+
+                        <br>
+                        <button type="button" class="btn-ack" data-bs-dismiss="modal">Acknowledge &amp; Close</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html> 
